@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小惊喜</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #fff;
+    color: #222;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .card { text-align: center; padding: 24px; }
+
+  /* 字框通用样式 */
+  .box {
+    display: none;
+    padding: 26px 38px;
+    border: 2px solid #222;
+    border-radius: 14px;
+    background: #fff;
+    font-size: clamp(18px, 5vw, 26px);
+    letter-spacing: 2px;
+    line-height: 1.5;
+    user-select: none;
+  }
+  .box.show {
+    display: inline-block;
+    animation: pop .45s ease both;
+  }
+
+  /* 【小惊喜】 */
+  #start {
+    cursor: pointer;
+    transition: background .25s, color .25s;
+  }
+  #start:hover, #start:active {
+    background: #222;
+    color: #fff;
+  }
+
+  /* 【生日快乐！】按钮 */
+  .wish-btn {
+    display: none;
+    margin-top: 30px;
+    padding: 14px 40px;
+    font-family: inherit;
+    font-size: clamp(16px, 4.5vw, 20px);
+    letter-spacing: 2px;
+    color: #fff;
+    background: #222;
+    border: 2px solid #222;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .2s;
+  }
+  .wish-btn:hover  { transform: translateY(-2px) scale(1.03); }
+  .wish-btn:active { transform: scale(.97); }
+  .wish-btn.show {
+    display: inline-block;
+    animation: pop .45s ease both;
+  }
+
+  /* 照片位置（现在用黑框代替） */
+  .photo {
+    display: none;
+    width: min(300px, 78vw);
+    aspect-ratio: 3 / 4;
+    background: #000;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
+  }
+  .photo.show {
+    display: block;
+    margin: 0 auto;
+    animation: pop .6s ease both;
+  }
+
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(14px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="box show" id="start">小惊喜</div>
+    <div class="box" id="msg"></div>
+    <button class="wish-btn" id="wishBtn">生日快乐！</button>
+
+    <!-- 换成真照片时，把下面这行的 div 换成：
+         <img class="photo" id="photo" src="photo.jpg" alt="照片"> -->
+    <div class="photo" id="photo"></div>
+  </div>
+
+<script>
+  // ====== 想改文案，改这里就行 ======
+  const messages = [
+    '祝你生日快乐～祝你生日快乐～',
+    '成年快乐呀学姐',
+    '祝你的十八岁顺遂平安',
+    '要天天开心呀'
+  ];
+  const HOLD = 3000; // 每个字框停留时间（毫秒）
+
+  const startEl = document.getElementById('start');
+  const msgEl   = document.getElementById('msg');
+  const wishBtn = document.getElementById('wishBtn');
+  const photoEl = document.getElementById('photo');
+
+  let index  = 0;
+  let locked = false; // 防止重复点击【小惊喜】
+
+  // 让元素重新播放出现动画
+  function replay(el) {
+    el.classList.remove('show');
+    void el.offsetWidth; // 强制重排
+    el.classList.add('show');
+  }
+
+  function showMessage() {
+    const isLast = index === messages.length - 1;
+
+    msgEl.textContent = messages[index];
+    replay(msgEl);
+
+    if (isLast) {
+      // 最后一个字框停留不消失，随后浮出【生日快乐！】按钮
+      setTimeout(() => replay(wishBtn), 700);
+      return;
+    }
+
+    setTimeout(() => {
+      index += 1;
+      showMessage();
+    }, HOLD);
+  }
+
+  // 点击【小惊喜】
+  startEl.addEventListener('click', () => {
+    if (locked) return;
+    locked = true;
+    startEl.classList.remove('show');
+    showMessage();
+  });
+
+  // 点击【生日快乐！】→ 出现照片
+  wishBtn.addEventListener('click', () => {
+    msgEl.classList.remove('show');
+    wishBtn.classList.remove('show');
+    replay(photoEl);
+  });
+</script>
+
+</body>
+</html>
